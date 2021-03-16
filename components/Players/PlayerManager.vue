@@ -72,7 +72,7 @@
               <div
                 class="d-flex flex-column justify-space-between align-center player-overlay"
               >
-                <div class="osd-top">
+                <div class="osd-top pt-s pl-s pr-s">
                   <div class="d-flex justify-space-between align-center">
                     <div class="d-flex">
                       <v-btn icon @click="stopPlayback">
@@ -104,8 +104,8 @@
                   </div>
                 </div>
 
-                <div class="px-4 osd-bottom">
-                  <div>
+                <div class="osd-bottom pb-s pl-s pr-s">
+                  <div class="px-4">
                     <time-slider />
                     <div class="d-flex justify-space-between">
                       <div>
@@ -164,7 +164,9 @@ export default Vue.extend({
     return {
       showFullScreenOverlay: false,
       fullScreenOverlayTimer: null as number | null,
-      supportedFeatures: {} as SupportedFeaturesInterface
+      supportedFeatures: {} as SupportedFeaturesInterface,
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      unsubscribe(): void {}
     };
   },
   computed: {
@@ -195,9 +197,23 @@ export default Vue.extend({
       }
     }
   },
-  created() {
-    this.$store.subscribe((mutation, state: AppState) => {
+  beforeMount() {
+    this.supportedFeatures = getSupportedFeatures();
+  },
+  mounted() {
+    document.addEventListener('mousemove', this.handleMouseMove);
+
+    this.addMediaHandlers();
+
+    this.unsubscribe = this.$store.subscribe((mutation, state: AppState) => {
       switch (mutation.type) {
+        case 'playbackManager/TOGGLE_MINIMIZE':
+          if (state.playbackManager.isMinimized === true) {
+            window.removeEventListener('keydown', this.handleKeyPress);
+          } else if (state.playbackManager.isMinimized === false) {
+            window.addEventListener('keydown', this.handleKeyPress);
+          }
+          break;
         case 'playbackManager/INCREASE_QUEUE_INDEX':
         case 'playbackManager/DECREASE_QUEUE_INDEX':
         case 'playbackManager/SET_CURRENT_ITEM_INDEX':
@@ -315,30 +331,13 @@ export default Vue.extend({
       }
     });
   },
-  beforeMount() {
-    this.supportedFeatures = getSupportedFeatures();
-  },
-  mounted() {
-    document.addEventListener('mousemove', this.handleMouseMove);
-
-    this.addMediaHandlers();
-
-    this.$store.subscribe((mutation, state: AppState) => {
-      switch (mutation.type) {
-        case 'playbackManager/TOGGLE_MINIMIZE':
-          if (state.playbackManager.isMinimized === true) {
-            window.removeEventListener('keydown', this.handleKeyPress);
-          } else if (state.playbackManager.isMinimized === false) {
-            window.addEventListener('keydown', this.handleKeyPress);
-          }
-      }
-    });
-  },
   beforeDestroy() {
     if (this.fullScreenOverlayTimer) {
       clearTimeout(this.fullScreenOverlayTimer);
     }
     document.removeEventListener('mousemove', this.handleMouseMove);
+    this.removeMediaHandlers();
+    this.unsubscribe();
   },
   methods: {
     ...mapActions('playbackManager', [

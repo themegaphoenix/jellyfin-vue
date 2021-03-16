@@ -211,7 +211,8 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { pick, set } from 'lodash';
+import pick from 'lodash/pick';
+import set from 'lodash/set';
 import { BaseItemDto, BaseItemPerson } from '@jellyfin/client-axios';
 
 export default Vue.extend({
@@ -241,7 +242,9 @@ export default Vue.extend({
   computed: {
     premiereDate: {
       get(): string {
-        if (!this.metadata.PremiereDate) return '';
+        if (!this.metadata.PremiereDate) {
+          return '';
+        }
         const dateStr = this.$dateFns.format(
           new Date(this.metadata.PremiereDate),
           'yyyy-MM-dd',
@@ -252,7 +255,9 @@ export default Vue.extend({
     },
     dateCreated: {
       get(): string {
-        if (!this.metadata.DateCreated) return '';
+        if (!this.metadata.DateCreated) {
+          return '';
+        }
         const dateStr = this.$dateFns.format(
           new Date(this.metadata.DateCreated),
           'yyyy-MM-dd',

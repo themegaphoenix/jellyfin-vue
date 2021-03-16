@@ -58,11 +58,12 @@
           v-if="overlay && !$browser.isMobile()"
           class="card-overlay d-flex justify-center align-center"
         >
-          <play-button fab :item="item" />
+          <play-button fab :items="[item]" />
           <div
             v-if="overlay"
             class="card-lower-buttons d-flex justify-center align-center"
           >
+            <mark-played-button :item="item" dark />
             <like-button v-if="canPlay(item)" :item="item" dark />
             <item-menu :item="item" dark />
           </div>
@@ -148,7 +149,9 @@ export default Vue.extend({
     cardTitle(): string {
       if (this.item.Type !== 'Episode') {
         return this.item.Name || '';
-      } else return this.item.SeriesName || '';
+      } else {
+        return this.item.SeriesName || '';
+      }
     },
     /**
      * @returns {string} Either a string representing the production year(s) for the current item

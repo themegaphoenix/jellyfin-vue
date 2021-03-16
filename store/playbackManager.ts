@@ -1,5 +1,6 @@
 import { ActionTree, GetterTree, MutationTree } from 'vuex';
-import { clamp, shuffle } from 'lodash';
+import clamp from 'lodash/clamp';
+import shuffle from 'lodash/shuffle';
 import {
   BaseItemDto,
   ChapterInfo,
@@ -167,11 +168,14 @@ export const mutations: MutationTree<PlaybackManagerState> = {
     if (state.currentItemIndex !== null) {
       state.lastItemIndex = state.currentItemIndex;
       state.currentItemIndex += 1;
+      state.currentTime = 0;
     }
   },
   DECREASE_QUEUE_INDEX(state: PlaybackManagerState) {
     if (state.currentItemIndex !== null) {
+      state.lastItemIndex = state.currentItemIndex;
       state.currentItemIndex -= 1;
+      state.currentTime = 0;
     }
   },
   START_PLAYBACK(
